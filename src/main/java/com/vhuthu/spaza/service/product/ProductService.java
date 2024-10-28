@@ -1,13 +1,18 @@
 package com.vhuthu.spaza.service.product;
 
+import com.vhuthu.spaza.dto.ImageDto;
+import com.vhuthu.spaza.dto.ProductDto;
 import com.vhuthu.spaza.exceptions.ProductNotFoundException;
 import com.vhuthu.spaza.model.Category;
+import com.vhuthu.spaza.model.Image;
 import com.vhuthu.spaza.model.Product;
 import com.vhuthu.spaza.repository.CategoryRepository;
+import com.vhuthu.spaza.repository.ImageRepository;
 import com.vhuthu.spaza.repository.ProductRepository;
 import com.vhuthu.spaza.request.AddProductRequest;
 import com.vhuthu.spaza.request.ProductUpdateRequest;
 import lombok.RequiredArgsConstructor;
+import org.modelmapper.ModelMapper;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -18,6 +23,8 @@ import java.util.Optional;
 public class ProductService implements IProductService {
     private final ProductRepository productRepository;
     private final CategoryRepository categoryRepository;
+    private final ModelMapper modelMapper;
+    private final ImageRepository imageRepository;
 
     @Override
     public Product addProduct(AddProductRequest request) {
@@ -75,7 +82,9 @@ public class ProductService implements IProductService {
     }
 
     @Override
-    public List<Product> getAllProducts() {return productRepository.findAll();}
+    public List<Product> getAllProducts() {
+        return productRepository.findAll();
+    }
 
     @Override
     public List<Product> getProductsByCategory(String category) {
@@ -105,5 +114,24 @@ public class ProductService implements IProductService {
     @Override
     public Long countProductsByBrandAndName(String brand, String name) {
         return productRepository.countByBrandAndName(brand, name);
+    }
+
+    @Override
+    public List<ProductDto> getConvertedProducts(List<Product> products) {
+        return products.stream()
+                .map(this::convertToDto)
+                .toList();
+    }
+
+    @Override
+    public ProductDto convertToDto(Product product) {
+        ProductDto productDto = modelMapper.map(product, ProductDto.class);
+        List<Image> images = imageRepository.findByProductId(product.getId());
+        List<ImageDto> imageDtos = images.stream()
+                .map(image -> modelMapper.map(image, ImageDto.class))
+                .toList();
+
+        productDto.setImages(imageDtos);
+        return productDto;
     }
 }

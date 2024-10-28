@@ -1,5 +1,6 @@
 package com.vhuthu.spaza.service.product;
 
+import com.vhuthu.spaza.dto.ProductDto;
 import com.vhuthu.spaza.model.Product;
 import com.vhuthu.spaza.request.AddProductRequest;
 import com.vhuthu.spaza.request.ProductUpdateRequest;
@@ -28,4 +29,8 @@ public interface IProductService {
     List<Product> getProductsByBrandAndName(String category, String name);
 
     Long countProductsByBrandAndName(String brand,String name);
+
+    List<ProductDto> getConvertedProducts(List<Product> products);
+
+    ProductDto convertToDto(Product product);
 }
